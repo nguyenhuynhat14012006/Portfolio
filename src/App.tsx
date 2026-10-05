@@ -1,8 +1,8 @@
 import { useRef, type MouseEvent, type ReactNode } from 'react';
-import { motion, useScroll, useTransform, type MotionValue } from 'framer-motion';
+import { motion, useScroll, useTransform, useReducedMotion, type MotionValue } from 'framer-motion';
+import { Ship, Plane, Truck, Package, Anchor, Globe } from 'lucide-react';
 import avatar from './avatar.jpg';
 
-// Cuộn mượt tới một phần theo id (dùng JS để chắc chắn bấm được)
 const goTo = (id: string) => (e: MouseEvent) => {
   e.preventDefault();
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -20,7 +20,6 @@ const FadeIn = ({ children, delay = 0, y = 30, className = '' }: { children: Rea
   </motion.div>
 );
 
-// Chữ sáng dần theo từng TỪ (giữ khoảng trắng, không bị gãy từ)
 const Word = ({ word, range, progress }: { word: string; range: [number, number]; progress: MotionValue<number> }) => {
   const opacity = useTransform(progress, range, [0.2, 1]);
   return <motion.span style={{ opacity }} className="inline-block mr-[0.3em]">{word}</motion.span>;
@@ -38,6 +37,63 @@ const AnimatedText = ({ text, className = '' }: { text: string; className?: stri
     </p>
   );
 };
+
+// --- Hiệu ứng icon logistics ---
+
+// Icon bay lơ lửng ở đầu trang
+const Float = ({ icon, className, delay = 0 }: { icon: ReactNode; className: string; delay?: number }) => {
+  const reduce = useReducedMotion();
+  return (
+    <motion.div
+      className={`absolute z-0 text-[#D7E2EA]/25 ${className}`}
+      animate={reduce ? undefined : { y: [0, -16, 0], rotate: [-4, 4, -4] }}
+      transition={{ duration: 6, delay, repeat: Infinity, ease: 'easeInOut' }}
+    >
+      {icon}
+    </motion.div>
+  );
+};
+
+// Máy bay chạy dọc mép phải, xe tải chạy ngang đáy màn hình theo tiến độ cuộn
+const ScrollTravel = () => {
+  const { scrollYProgress } = useScroll();
+  const top = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
+  const left = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
+  return (
+    <div className="pointer-events-none fixed inset-0 z-40 mix-blend-difference text-white">
+      <div className="hidden md:block absolute right-4 top-28 bottom-12 border-l border-dashed border-white/40">
+        <motion.div style={{ top }} className="absolute -left-[11px] rotate-[135deg]">
+          <Plane size={22} />
+        </motion.div>
+      </div>
+      <div className="absolute inset-x-6 bottom-2 border-t border-dashed border-white/40">
+        <motion.div style={{ left }} className="absolute -top-[22px] -translate-x-1/2">
+          <Truck size={24} />
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+
+// Icon nhỏ cạnh tiêu đề, bật ra khi cuộn tới
+const TitleIcon = ({ children, dark = false }: { children: ReactNode; dark?: boolean }) => (
+  <motion.span
+    initial={{ scale: 0, rotate: -45 }}
+    whileInView={{ scale: 1, rotate: 0 }}
+    viewport={{ once: true }}
+    transition={{ type: 'spring', stiffness: 200, damping: 12 }}
+    className={`inline-flex items-center justify-center w-9 h-9 rounded-full mr-3 align-middle shrink-0 ${dark ? 'bg-[#D7E2EA]/10 text-[#D7E2EA]' : 'bg-[#0C0C0C]/5 text-[#0C0C0C]'}`}
+  >
+    {children}
+  </motion.span>
+);
+
+const BigTitle = ({ icon, children }: { icon: ReactNode; children: ReactNode }) => (
+  <div className="flex flex-col items-center gap-4 text-center">
+    <TitleIcon dark>{icon}</TitleIcon>
+    <h2 className="hero-heading font-black uppercase leading-none tracking-tight text-[clamp(3rem,12vw,160px)]">{children}</h2>
+  </div>
+);
 
 const ContactButton = () => (
   <a
@@ -59,9 +115,9 @@ const Navbar = () => {
   const items = [
     { name: 'Giới thiệu', id: 'gioi-thieu' },
     { name: 'Học vấn & Kỹ năng', id: 'hoc-van' },
-    { name: 'Dự án', id: 'du-an' },
     { name: 'Hoạt động & Kinh nghiệm', id: 'hoat-dong' },
     { name: 'Liên hệ', id: 'lien-he' },
+    { name: 'Dự án', id: 'du-an' },
   ];
   return (
     <nav className="fixed top-0 left-0 w-full z-[9999] bg-[#0C0C0C]/90 backdrop-blur-md flex justify-between items-center px-6 md:px-10 py-5 md:py-6">
@@ -81,6 +137,12 @@ const Navbar = () => {
 
 const HeroSection = () => (
   <section className="h-screen flex flex-col relative overflow-hidden">
+    <Float icon={<Ship size={72} />} className="top-[22%] left-[6%]" />
+    <Float icon={<Plane size={64} />} className="top-[18%] right-[8%]" delay={1} />
+    <Float icon={<Package size={56} />} className="top-[52%] left-[14%]" delay={2} />
+    <Float icon={<Truck size={64} />} className="top-[50%] right-[14%]" delay={3} />
+    <Float icon={<Globe size={52} />} className="top-[70%] left-[4%]" delay={4} />
+    <Float icon={<Anchor size={52} />} className="top-[68%] right-[5%]" delay={5} />
     <div className="flex-1 flex flex-col justify-center items-center pt-16">
       <FadeIn delay={0.15} y={40} className="w-full text-center relative z-20">
         <h1 className="hero-heading font-black uppercase tracking-tight leading-none whitespace-nowrap text-[14vw] sm:text-[15vw] md:text-[16vw] lg:text-[17.5vw]">
@@ -91,7 +153,7 @@ const HeroSection = () => (
     <FadeIn delay={0.5} y={30} className="absolute left-1/2 -translate-x-1/2 z-10 bottom-24 sm:bottom-0 w-[190px] sm:w-[250px] md:w-[300px]">
       <img src={avatar} alt="Huy Nhật" className="w-full h-auto rounded-t-[40px] object-cover" />
     </FadeIn>
-    <div className="flex justify-between items-end pb-7 sm:pb-8 md:pb-10 px-6 md:px-10 w-full z-20 absolute bottom-0">
+    <div className="flex justify-between items-end pb-10 sm:pb-12 px-6 md:px-10 w-full z-20 absolute bottom-0">
       <p className="text-[#D7E2EA] font-light uppercase tracking-wide leading-snug text-[clamp(0.75rem,1.4vw,1.5rem)] max-w-[160px] sm:max-w-[220px] md:max-w-[260px]">
         Sinh viên Kinh tế đối ngoại, hướng tới vị trí chuyên viên logistics.
       </p>
@@ -102,8 +164,8 @@ const HeroSection = () => (
 
 const AboutSection = () => (
   <section id="gioi-thieu" className="scroll-mt-24 relative flex flex-col items-center px-5 sm:px-8 md:px-10 py-24">
-    <FadeIn className="mb-12 text-center">
-      <h2 className="hero-heading font-black uppercase leading-none tracking-tight text-[clamp(3rem,12vw,160px)]">Giới thiệu</h2>
+    <FadeIn className="mb-12">
+      <BigTitle icon={<Globe size={20} />}>Giới thiệu</BigTitle>
     </FadeIn>
     <FadeIn delay={0.2} className="mb-12">
       <div className="bg-[#151515]/80 border border-[#D7E2EA]/20 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 max-w-2xl">
@@ -129,24 +191,50 @@ const AboutSection = () => (
   </section>
 );
 
-const Row = ({ id, num, title, children }: { id: string; num: string; title: string; children: ReactNode }) => (
+const Row = ({ id, num, title, icon, children }: { id: string; num: string; title: string; icon: ReactNode; children: ReactNode }) => (
   <FadeIn y={20}>
     <div id={id} className="scroll-mt-24 flex flex-col sm:flex-row gap-6 sm:gap-10 border-b border-[rgba(12,12,12,0.15)] py-8 sm:py-10 md:py-12 items-start">
       <div className="font-black text-[#0C0C0C] text-[clamp(3rem,10vw,140px)] leading-none w-24 sm:w-32 md:w-48 shrink-0">{num}</div>
       <div className="flex flex-col">
-        <h3 className="font-medium uppercase text-[clamp(1rem,2.2vw,2.1rem)] text-[#0C0C0C] mb-4">{title}</h3>
+        <h3 className="flex items-center font-medium uppercase text-[clamp(1rem,2.2vw,2.1rem)] text-[#0C0C0C] mb-4">
+          <TitleIcon>{icon}</TitleIcon>
+          {title}
+        </h3>
         <div className="font-light leading-relaxed max-w-2xl text-[clamp(0.95rem,1.6vw,1.25rem)] text-[#0C0C0C]/80 space-y-3">{children}</div>
       </div>
     </div>
   </FadeIn>
 );
 
-const EducationSection = () => (
-  <section className="relative bg-white rounded-t-[40px] sm:rounded-t-[50px] md:rounded-t-[60px] px-5 sm:px-8 md:px-10 pt-16 pb-6">
+const ProfileSection = () => (
+  <section className="relative bg-white rounded-t-[40px] sm:rounded-t-[50px] md:rounded-t-[60px] px-5 sm:px-8 md:px-10 pt-16 pb-24 pr-8 md:pr-14">
     <div className="max-w-5xl mx-auto">
-      <Row id="hoc-van" num="01" title="Học vấn và kỹ năng">
+      <Row id="hoc-van" num="01" title="Học vấn và kỹ năng" icon={<Package size={20} />}>
         <p>Đại học Ngoại thương, chuyên ngành Kinh tế đối ngoại, dự kiến tốt nghiệp 2028.</p>
-        <p>Kỹ năng: IELTS 7.5 Overall; Microsoft Office Specialist (MOS) Excel, xử lý số liệu; quản lý đội nhóm, tổ chức sự kiện; chứng từ xuất nhập khẩu.</p>
+        <p><span className="font-medium">Thành thạo:</span> Excel, gồm các hàm, pivot table và xử lý số liệu (có chứng chỉ MOS Excel). Tiếng Anh, IELTS 7.5 Overall. Quản lý đội nhóm và tổ chức sự kiện. Chứng từ xuất nhập khẩu.</p>
+        <p><span className="font-medium">Đang hoàn thiện:</span> Chứng chỉ Google Data Analytics.</p>
+      </Row>
+      <Row id="muc-tieu" num="02" title="Mục tiêu nghề nghiệp" icon={<Ship size={20} />}>
+        <p>Mình muốn phát triển ở vị trí Pricing Executive tại công ty forwarder. Mình sẽ dùng nền tảng xuất nhập khẩu, tiếng Anh và Excel để làm việc với bảng giá cước và báo giá, đồng thời học thêm phân tích dữ liệu để theo dõi và so sánh giá tốt hơn.</p>
+      </Row>
+      <Row id="hoat-dong" num="03" title="Hoạt động và kinh nghiệm" icon={<Truck size={20} />}>
+        <ul className="list-disc pl-5 space-y-3">
+          <li>Học việc tại văn phòng chứng từ, công ty xuất nhập khẩu máy lọc nước Nhật Bản, tháng 3 đến tháng 5/2026.</li>
+          <li>Chủ tịch Câu lạc bộ Kỹ năng sống LSC FTU, Đại học Ngoại thương, 2025 đến 2026. Điều hành 50 thành viên, phụ trách tổ chức sự kiện, cuộc thi và hoạt động tình nguyện.</li>
+          <li>Học việc chăm sóc khách hàng tại một ngân hàng tư nhân, tháng 6 đến tháng 8/2026.</li>
+        </ul>
+      </Row>
+      <Row id="lien-he" num="04" title="Liên hệ" icon={<Plane size={20} />}>
+        <p>
+          <span className="font-medium">Email:</span>{' '}
+          <a href="mailto:nhatnh17.lsc@gmail.com" className="underline hover:text-[#B600A8]">nhatnh17.lsc@gmail.com</a>
+        </p>
+        <p>
+          <span className="font-medium">LinkedIn:</span>{' '}
+          <a href="https://www.linkedin.com/in/nh%E1%BA%ADt-nguy%E1%BB%85n-huy-002084431/" target="_blank" rel="noopener noreferrer" className="underline hover:text-[#B600A8] break-all">
+            linkedin.com/in/nhật-nguyễn-huy
+          </a>
+        </p>
       </Row>
     </div>
   </section>
@@ -172,9 +260,9 @@ const projects = [
 ];
 
 const ProjectsSection = () => (
-  <section id="du-an" className="scroll-mt-0 relative bg-[#0C0C0C] rounded-t-[40px] sm:rounded-t-[50px] md:rounded-t-[60px] -mt-10 px-5 sm:px-8 md:px-10 pb-24">
-    <div className="pt-20 sm:pt-24 mb-16 text-center">
-      <h2 className="hero-heading font-black uppercase text-[clamp(3rem,12vw,160px)]">Dự án</h2>
+  <section id="du-an" className="relative bg-[#0C0C0C] rounded-t-[40px] sm:rounded-t-[50px] md:rounded-t-[60px] -mt-10 px-5 sm:px-8 md:px-10 pb-28 md:pr-14">
+    <div className="pt-20 sm:pt-24 mb-16">
+      <BigTitle icon={<Anchor size={20} />}>Dự án</BigTitle>
     </div>
     {projects.map((p) => (
       <FadeIn key={p.num} className="mb-10">
@@ -198,41 +286,15 @@ const ProjectsSection = () => (
   </section>
 );
 
-const ActivitySection = () => (
-  <section className="relative bg-white rounded-t-[40px] sm:rounded-t-[50px] md:rounded-t-[60px] -mt-10 px-5 sm:px-8 md:px-10 pt-16 pb-24">
-    <div className="max-w-5xl mx-auto">
-      <Row id="hoat-dong" num="02" title="Hoạt động và kinh nghiệm">
-        <ul className="list-disc pl-5 space-y-3">
-          <li>Học việc tại văn phòng chứng từ, công ty xuất nhập khẩu máy lọc nước Nhật Bản, tháng 3 đến tháng 5/2026.</li>
-          <li>Chủ tịch Câu lạc bộ Kỹ năng sống LSC FTU, Đại học Ngoại thương, 2025 đến 2026. Điều hành 50 thành viên, phụ trách tổ chức sự kiện, cuộc thi và hoạt động tình nguyện.</li>
-          <li>Học việc chăm sóc khách hàng tại một ngân hàng tư nhân, tháng 6 đến tháng 8/2026.</li>
-        </ul>
-      </Row>
-      <Row id="lien-he" num="03" title="Liên hệ">
-        <p>
-          <span className="font-medium">Email:</span>{' '}
-          <a href="mailto:nhatnh17.lsc@gmail.com" className="underline hover:text-[#B600A8]">nhatnh17.lsc@gmail.com</a>
-        </p>
-        <p>
-          <span className="font-medium">LinkedIn:</span>{' '}
-          <a href="https://www.linkedin.com/in/nh%E1%BA%ADt-nguy%E1%BB%85n-huy-002084431/" target="_blank" rel="noopener noreferrer" className="underline hover:text-[#B600A8] break-all">
-            linkedin.com/in/nhật-nguyễn-huy
-          </a>
-        </p>
-      </Row>
-    </div>
-  </section>
-);
-
 export default function App() {
   return (
     <div className="bg-[#0C0C0C] min-h-screen relative">
       <Navbar />
+      <ScrollTravel />
       <HeroSection />
       <AboutSection />
-      <EducationSection />
+      <ProfileSection />
       <ProjectsSection />
-      <ActivitySection />
     </div>
   );
 }
