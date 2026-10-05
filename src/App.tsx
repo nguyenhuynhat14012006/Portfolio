@@ -2,6 +2,10 @@ import { useRef, type MouseEvent, type ReactNode } from 'react';
 import { motion, useScroll, useTransform, useReducedMotion, type MotionValue } from 'framer-motion';
 import { Ship, Plane, Truck, Package, Anchor, Globe } from 'lucide-react';
 import avatar from './avatar.jpg';
+import td1 from './td1.jpg';
+import td2 from './td2.jpg';
+import ps1 from './ps1.jpg';
+import ps2 from './ps2.jpg';
 
 const goTo = (id: string) => (e: MouseEvent) => {
   e.preventDefault();
@@ -225,7 +229,7 @@ const AboutSection = () => (
     </FadeIn>
 
     <AnimatedText
-      text="Xin chào, mình là Huy Nhật, sinh viên năm 3 chuyên ngành Kinh tế đối ngoại tại Đại học Ngoại thương. Mình có nền tảng về thương mại quốc tế và xuất nhập khẩu, và đang hướng tới vị trí chuyên viên logistics. Mình làm tốt ba việc: quản lý đội ngũ với vai trò chủ tịch câu lạc bộ, đọc và làm việc với tài liệu bằng tiếng Anh, và dùng Excel để xử lý số liệu. Mình từng dẫn dắt chương trình gây quỹ huy động 70 triệu đồng cho 100 em nhỏ vùng cao."
+      text="Xin chào, mình là Huy Nhật, sinh viên chuyên ngành Kinh tế đối ngoại tại Đại học Ngoại thương. Mình có nền tảng về thương mại quốc tế và xuất nhập khẩu, và đang hướng tới vị trí chuyên viên logistics. Mình làm tốt ba việc: quản lý đội ngũ với vai trò chủ tịch câu lạc bộ, đọc và làm việc với tài liệu bằng tiếng Anh, và dùng Excel để xử lý số liệu. Mình từng dẫn dắt chương trình gây quỹ huy động 70 triệu đồng cho 100 em nhỏ vùng cao."
       className="text-[#D7E2EA] font-medium leading-relaxed max-w-[620px] text-[clamp(1rem,2vw,1.35rem)] text-center mb-16"
     />
     <ContactButton />
@@ -294,6 +298,7 @@ const projects = [
     description:
       'Trưởng chương trình. Mình là trưởng chương trình gây quỹ "Tết đỏ cho em" của câu lạc bộ, huy động được 70 triệu đồng để hỗ trợ 100 em nhỏ mẫu giáo tại Tuyên Quang có một cái Tết ấm no. Mình trực tiếp lên kế hoạch cho chương trình, làm việc và đại diện câu lạc bộ trao đổi với các bên liên quan để giữ cả chương trình đi đúng tiến độ đến ngày trao quà.',
     tags: ['Lãnh đạo dự án', 'Lập kế hoạch', 'Gây quỹ', 'Điều phối các bên', 'Tổ chức sự kiện'],
+    images: [td1, td2],
   },
   {
     num: '02',
@@ -302,6 +307,15 @@ const projects = [
     description:
       'Nhóm trưởng, nhóm 6 thành viên. Nhóm phân tích một hợp đồng xuất khẩu thực tế: cà phê nhân Robusta S18 loại 1 đánh bóng, giao từ TP. Hồ Chí Minh đến cảng cá Vladivostok (Nga) theo điều kiện CIF Incoterms 2020, thanh toán bằng T/T. Báo cáo gồm bốn phần: cơ sở lý thuyết về hợp đồng mua bán quốc tế; phân tích hợp đồng và phụ lục, kèm đánh giá điểm mạnh, điểm yếu và đề xuất; phân tích bộ chứng từ (Commercial Invoice, Packing List, Bill of Lading, C/O mẫu EAV, giấy chứng nhận khử trùng, kiểm dịch thực vật, bảo hiểm hàng hải, giám định SGS); và quy trình thực hiện xuất khẩu. Với vai trò nhóm trưởng, tôi phân công công việc, theo dõi tiến độ và tổng hợp báo cáo cuối cùng. Báo cáo viết hoàn toàn bằng tiếng Anh.',
     tags: ['CIF', 'T/T', 'C/O form EAV', 'SGS', 'Chứng từ xuất khẩu'],
+  },
+  {
+    num: '03',
+    category: 'Câu lạc bộ Kỹ năng sống LSC FTU | 2025',
+    title: 'Cuộc thi "Phóng sự nhập học" - K65 FTU',
+    description:
+      'Phụ trách điều phối và trực tiếp làm việc với các bên hợp tác, đối tác truyền thông để tổ chức thành công cuộc thi "Phóng sự nhập học". Cuộc thi đã thu hút sự tham gia của gần 100 tân sinh viên khóa K65 Đại học Ngoại thương, tạo môi trường giúp các bạn tân sinh viên hòa nhập, thể hiện tư duy sáng tạo và gắn kết với môi trường đại học.',
+    tags: ['Điều phối dự án', 'Đối tác & Hợp tác', 'Tân sinh viên K65', 'Truyền thông & Sự kiện', 'Quản lý đội ngũ'],
+    images: [ps1, ps2],
   },
 ];
 
@@ -327,7 +341,30 @@ const ProjectsSection = () => (
               <h3 className="text-[#D7E2EA] font-medium uppercase text-xl sm:text-3xl md:text-4xl leading-snug">{p.title}</h3>
             </div>
           </div>
+          
           <p className="text-[#D7E2EA]/90 font-light text-[clamp(1rem,1.6vw,1.3rem)] leading-relaxed max-w-5xl mb-8">{p.description}</p>
+          
+          {/* Khối hiển thị hình ảnh dự án (Image Gallery Grid) */}
+          {p.images && p.images.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 my-8">
+              {p.images.map((img, idx) => (
+                <motion.div
+                  key={idx}
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ duration: 0.3 }}
+                  className="relative h-56 sm:h-64 md:h-72 rounded-2xl overflow-hidden border border-white/15 shadow-lg group/img cursor-pointer"
+                >
+                  <img
+                    src={img}
+                    alt={`${p.title} - ảnh ${idx + 1}`}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover/img:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300" />
+                </motion.div>
+              ))}
+            </div>
+          )}
+
           <div className="flex flex-wrap gap-3">
             {p.tags.map((t) => (
               <motion.span 
